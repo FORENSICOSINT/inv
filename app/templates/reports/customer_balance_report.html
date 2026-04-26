@@ -111,6 +111,23 @@
         width: 100%;
     }
 }
+
+/* Reduce horizontal scrolling */
+.table-responsive .table {
+    width: 100%;
+    table-layout: auto;
+}
+.table-responsive .table th,
+.table-responsive .table td {
+    font-size: 0.85rem;
+    padding: 0.4rem 0.5rem;
+    white-space: nowrap;
+}
+.table-responsive .table td:nth-child(2),
+.table-responsive .table td:nth-child(5) {
+    white-space: normal;
+    word-wrap: break-word;
+}
 </style>
 
 

@@ -780,8 +780,22 @@
 
 
 
-
-
+    /* Reduce horizontal scrolling */
+    #inventoryTable {
+        table-layout: auto;
+        width: 100%;
+    }
+    #inventoryTable th,
+    #inventoryTable td {
+        white-space: nowrap;
+        font-size: 0.85rem;
+        padding: 0.4rem 0.5rem;
+    }
+    #inventoryTable td:nth-child(2) {
+        white-space: normal;
+        max-width: 180px;
+        word-wrap: break-word;
+    }
 
 </style>
 
@@ -809,19 +823,9 @@
                     <i data-feather="printer" class="feather-14 me-2"></i>Print
                 </button>
 
-                <!-- <div class="btn-group">
-                    <button class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown">
-                        <i class="ti ti-download me-1"></i>
-                        Export
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="#" onclick="exportData('csv')">CSV</a></li>
-                        <li><a class="dropdown-item" href="#" onclick="exportData('excel')">Excel</a></li>
-                        <li><a class="dropdown-item" href="#" onclick="exportData('pdf')">PDF</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="#" onclick="window.print()"><i data-feather='printer' class='feather-14 me-2'></i>Print</a></li>
-                    </ul>
-                </div> -->
+                <button class="btn btn-primary ms-2" data-bs-toggle="modal" data-bs-target="#stockIntakeModal">
+                    <i class="ti ti-package-import me-1"></i>Stock Intake
+                </button>
 
 
             </div>
@@ -2010,7 +2014,110 @@ $(document).ready(function() {
 });
 
 
+// Stock Intake Modal
+function loadStockIntakeData() {
+    const tbody = document.getElementById('stockIntakeBody');
+    tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></td></tr>';
+
+    const rows = document.querySelectorAll('#inventoryTable tbody tr[data-index]');
+    let html = '';
+    let rowIndex = 0;
+
+    rows.forEach(function(row) {
+        const cells = row.querySelectorAll('td');
+        if (cells.length < 5) return;
+
+        // Column 1 = Product name
+        const productName = cells[1] ? cells[1].textContent.trim().split('\n')[0].trim() : '';
+        // Column 3 = Store/Branch
+        const storeName = cells[3] ? cells[3].textContent.trim().split('\n')[0].trim() : '';
+        // Column 4 = Current Stock (text-end, intcomma formatted)
+        const stockText = cells[4] ? cells[4].textContent.trim().replace(/,/g, '') : '0';
+        const currentStock = parseInt(stockText) || 0;
+        // Column 0 = SKU (has batch-count-badge)
+        const batchBadge = cells[0] ? cells[0].querySelector('.batch-count-badge') : null;
+        const batchText = batchBadge ? batchBadge.textContent.trim() : '1 batch';
+        const batchCount = parseInt(batchText) || 1;
+
+        html += '<tr>';
+        html += '<td class="fw-semibold">' + productName + '</td>';
+        html += '<td>' + storeName + '</td>';
+        html += '<td class="text-center">' + currentStock.toLocaleString() + '</td>';
+        html += '<td class="text-center"><input type="number" class="form-control form-control-sm text-center actual-stock-input" value="' + currentStock + '" min="0" data-current="' + currentStock + '" data-row="' + rowIndex + '"></td>';
+        html += '<td class="text-center">' + batchText + '</td>';
+        html += '</tr>';
+        rowIndex++;
+    });
+
+    if (!html) {
+        html = '<tr><td colspan="5" class="text-center text-muted py-4">No inventory data available</td></tr>';
+    }
+
+    tbody.innerHTML = html;
+
+    // Highlight differences when actual stock is modified
+    document.querySelectorAll('.actual-stock-input').forEach(function(input) {
+        input.addEventListener('input', function() {
+            const current = parseInt(this.dataset.current) || 0;
+            const actual = parseInt(this.value) || 0;
+            const row = this.closest('tr');
+            if (actual !== current) {
+                row.classList.add('table-warning');
+            } else {
+                row.classList.remove('table-warning');
+            }
+        });
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const stockIntakeModal = document.getElementById('stockIntakeModal');
+    if (stockIntakeModal) {
+        stockIntakeModal.addEventListener('show.bs.modal', loadStockIntakeData);
+    }
+});
 
 
 </script>
+
+<!-- Stock Intake Modal -->
+<div class="modal fade" id="stockIntakeModal" tabindex="-1" aria-labelledby="stockIntakeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header" style="background: #f8f9fa; border-radius: 12px 12px 0 0;">
+                <h5 class="modal-title fw-bold" id="stockIntakeModalLabel">
+                    <i class="ti ti-package-import me-2 text-primary"></i>Stock Intake Overview
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Product</th>
+                                <th>Store Branch</th>
+                                <th class="text-center">Stock</th>
+                                <th class="text-center">Actual Stock</th>
+                                <th class="text-center">Remaining Quantity (per batch)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stockIntakeBody">
+                            <tr>
+                                <td colspan="5" class="text-center py-4 text-muted">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer" style="background: #f8f9fa; border-radius: 0 0 12px 12px;">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-outline-primary" onclick="window.print()">
+                    <i class="ti ti-printer me-1"></i>Print
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock %}
