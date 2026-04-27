@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
-from django.db.models import Sum
+from django.db.models import Sum, F
 from app.models.transactions import PurchaseOrderItem
 
 
@@ -14,7 +14,7 @@ def stock_intake_report(request):
         'order', 'order__supplier', 'order__store', 'product', 'unit'
     ).all().order_by('-order__purchase_date')
 
-    total_cost = items.aggregate(total=Sum('unit_cost'))['total'] or 0
+    total_cost = items.aggregate(total=Sum(F('unit_cost') * F('quantity')))['total'] or 0
 
     return render(request, 'stock_intake_report.html', {
         'items': items,
