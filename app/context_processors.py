@@ -156,8 +156,10 @@ def app_menu(request):
                 {'label': 'Sales Report', 'url_name': 'sales_details'},
                 {'label': 'Balance Report', 'url_name': 'customer_balance_report'},
                 {'label': 'Expenses Report', 'url_name': 'expenses_report'},
+
                 {'label': 'Sales Returns Report', 'url_name': 'sales_returns_report'},
                 {'label': 'Stock Intake Report', 'url_name': 'stock_intake_report'},
+
                 {'label': 'Purchase Report', 'url_name': 'purchase_details'},
                 {'label': 'Inventory Report', 'url_name': 'inventory_details'},
                 {'label': 'Transfer Report', 'url_name': 'transfer_details'},
