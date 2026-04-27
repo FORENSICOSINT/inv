@@ -848,6 +848,19 @@
 <div id="toastContainer" class="position-fixed top-0 end-0 p-3" style="z-index: 9999;"></div>
 
 <script>
+// ── HTML escape utility ──
+function escapeHtml(str) {
+    var div = document.createElement('div');
+    div.appendChild(document.createTextNode(str || ''));
+    return div.innerHTML;
+}
+function sanitizeUrl(url) {
+    if (!url || typeof url !== 'string') return '#';
+    url = url.trim();
+    if (url.startsWith('/')) return url;
+    return '#';
+}
+
 // ── Global Search System ──
 (function(){
     var searchInput = document.getElementById('globalSearchInput');
@@ -871,7 +884,7 @@
                     if(placeholder) placeholder.style.display = 'none';
                     if(!resultsContainer) return;
                     if(!data.results || data.results.length === 0){
-                        resultsContainer.innerHTML = '<div class="search-info"><p class="text-muted text-center py-2">No results found for "'+query+'"</p></div>';
+                        resultsContainer.innerHTML = '<div class="search-info"><p class="text-muted text-center py-2">No results found for "'+escapeHtml(query)+'"</p></div>';
                         return;
                     }
                     var grouped = {};
@@ -881,10 +894,10 @@
                     });
                     var html = '';
                     for(var cat in grouped){
-                        html += '<div class="search-info"><h6><span><i class="ti '+grouped[cat][0].icon+' me-1"></i></span>'+cat+'</h6>';
+                        html += '<div class="search-info"><h6><span><i class="ti '+escapeHtml(grouped[cat][0].icon)+' me-1"></i></span>'+escapeHtml(cat)+'</h6>';
                         html += '<ul class="search-tags" style="list-style:none;padding:0;">';
                         grouped[cat].forEach(function(item){
-                            html += '<li style="margin-bottom:6px;"><a href="'+item.url+'" style="display:block;padding:6px 8px;border-radius:4px;text-decoration:none;color:#333;" onmouseover="this.style.background=\'#f0f0f0\'" onmouseout="this.style.background=\'transparent\'"><strong>'+item.title+'</strong><br><small class="text-muted">'+item.subtitle+'</small></a></li>';
+                            html += '<li style="margin-bottom:6px;"><a href="'+sanitizeUrl(item.url)+'" style="display:block;padding:6px 8px;border-radius:4px;text-decoration:none;color:#333;" onmouseover="this.style.background=\'#f0f0f0\'" onmouseout="this.style.background=\'transparent\'"><strong>'+escapeHtml(item.title)+'</strong><br><small class="text-muted">'+escapeHtml(item.subtitle)+'</small></a></li>';
                         });
                         html += '</ul></div>';
                     }
@@ -941,11 +954,12 @@ window.showToast = function(message, type, title) {
             var html = '';
             data.notifications.forEach(function(n){
                 var iconClass = {success:'ti-check text-success',error:'ti-x text-danger',warning:'ti-alert-triangle text-warning',info:'ti-info-circle text-info'}[n.type] || 'ti-info-circle text-info';
+                var nLink = n.link ? sanitizeUrl(n.link) : 'javascript:void(0);';
                 html += '<li class="notification-message'+(n.is_read?'':' bg-light')+'">'+
-                    '<a href="'+(n.link||'javascript:void(0);')+'">'+
-                    '<div class="media d-flex"><span class="avatar flex-shrink-0 d-flex align-items-center justify-content-center" style="width:36px;height:36px;"><i class="ti '+iconClass+'" style="font-size:18px;"></i></span>'+
-                    '<div class="flex-grow-1 ms-2"><p class="noti-details mb-0"><span class="noti-title fw-semibold">'+n.title+'</span> '+n.message+'</p>'+
-                    '<p class="noti-time text-muted" style="font-size:11px;">'+n.created_at+'</p></div></div></a></li>';
+                    '<a href="'+nLink+'">'+
+                    '<div class="media d-flex"><span class="avatar flex-shrink-0 d-flex align-items-center justify-content-center" style="width:36px;height:36px;"><i class="ti '+escapeHtml(iconClass)+'" style="font-size:18px;"></i></span>'+
+                    '<div class="flex-grow-1 ms-2"><p class="noti-details mb-0"><span class="noti-title fw-semibold">'+escapeHtml(n.title)+'</span> '+escapeHtml(n.message)+'</p>'+
+                    '<p class="noti-time text-muted" style="font-size:11px;">'+escapeHtml(n.created_at)+'</p></div></div></a></li>';
             });
             list.innerHTML = html;
         }).catch(function(){});

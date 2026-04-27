@@ -116,6 +116,7 @@ MENU_MODULE_MAP = {
     
     # Reports - Module 8
     'branch_sales_report': 8,
+    'expenses_report': 8,
     'sales_returns_report': 8,
     'stock_intake_report': 8,
     'branch_comparison_report': 8,

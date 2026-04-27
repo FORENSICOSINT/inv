@@ -69,6 +69,13 @@ class RoleCreateForm(ModelForm):
             # Non-superusers cannot assign the Dashboard module
             if self.current_user and not self.current_user.is_superuser:
                 module_ids = [m for m in module_ids if m != ADMIN_DASHBOARD_MODULE_ID]
+                # Preserve existing Dashboard access when editing
+                if self.instance and self.instance.pk:
+                    has_dashboard = self.instance.modules.filter(
+                        module_id=ADMIN_DASHBOARD_MODULE_ID
+                    ).exists()
+                    if has_dashboard and ADMIN_DASHBOARD_MODULE_ID not in module_ids:
+                        module_ids.append(ADMIN_DASHBOARD_MODULE_ID)
             # Set modules for the role
             role.set_modules(module_ids)
         return role
