@@ -80,6 +80,7 @@ def app_menu(request):
                 {'label': 'Category', 'url_name': 'add_category_page'},
                 {'label': 'Units', 'url_name': 'unit_of_measure_page'},
                 {'label': 'Products', 'url_name': 'products_page'},
+                {'label': 'Automotives', 'url_name': 'automotive_list'},
             ],
         },
         {
@@ -154,7 +155,9 @@ def app_menu(request):
                 # {'label': 'Report details', 'url_name': 'reports_details'},
                 {'label': 'Sales Report', 'url_name': 'sales_details'},
                 {'label': 'Balance Report', 'url_name': 'customer_balance_report'},
-                {'label': 'Expenses Report', 'url_name': None},
+                {'label': 'Expenses Report', 'url_name': 'expenses_report'},
+                {'label': 'Sales Returns Report', 'url_name': 'sales_returns_report'},
+                {'label': 'Stock Intake Report', 'url_name': 'stock_intake_report'},
                 {'label': 'Purchase Report', 'url_name': 'purchase_details'},
                 {'label': 'Inventory Report', 'url_name': 'inventory_details'},
                 {'label': 'Transfer Report', 'url_name': 'transfer_details'},
@@ -228,6 +231,17 @@ def app_menu(request):
     return {
         'app_menu': filtered,
     }
+
+def notification_context(request):
+    """Add notification data to template context"""
+    if request.user.is_authenticated:
+        from app.models.notification import Notification
+        unread_count = Notification.get_unread_count(request.user)
+        return {
+            'notification_unread_count': unread_count,
+        }
+    return {'notification_unread_count': 0}
+
 
 def transfer_notifications(request):
     """Add transfer-related notifications to template context"""
