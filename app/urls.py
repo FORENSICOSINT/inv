@@ -24,6 +24,17 @@ from .views.human_resource_views import *
 from app.views.product_autocomplete import product_autocomplete
 from app.views.expense_views import *
 from app.views.expenses_report_view import expenses_report
+from app.views.sales_returns_report_view import sales_returns_report
+from app.views.notification_views import (
+    notifications_list_view, notifications_api,
+    notification_mark_read, notification_mark_all_read,
+)
+from app.views.automotive_views import (
+    automotive_list_view, automotive_create_view,
+    automotive_edit_view, automotive_delete_view,
+)
+from app.views.stock_intake_report_view import stock_intake_report
+from app.views.global_search_view import global_search_api
 from app.views.finance_views import *
 from app.views.product_views import bulk_add_categories_view, download_category_template_view
 from .views.reports import sales_report_views, inventory_reports
@@ -49,6 +60,21 @@ urlpatterns = [
    
     path('app/dashboard/orders-by-date/', orders_by_date, name='orders_by_date_api'),
     path('expenses-report/', expenses_report, name='expenses_report'),
+    path('sales-returns-report/', sales_returns_report, name='sales_returns_report'),
+    path('stock-intake-report/', stock_intake_report, name='stock_intake_report'),
+    path('api/global-search/', global_search_api, name='global_search_api'),
+
+    # Notifications
+    path('notifications/', notifications_list_view, name='notifications_list'),
+    path('notifications/api/', notifications_api, name='notifications_api'),
+    path('notifications/<int:notification_id>/mark-read/', notification_mark_read, name='notification_mark_read'),
+    path('notifications/mark-all-read/', notification_mark_all_read, name='notification_mark_all_read'),
+
+    # Automotive Management
+    path('automotives/', automotive_list_view, name='automotive_list'),
+    path('automotives/create/', automotive_create_view, name='automotive_create'),
+    path('automotives/<int:automotive_id>/edit/', automotive_edit_view, name='automotive_edit'),
+    path('automotives/<int:automotive_id>/delete/', automotive_delete_view, name='automotive_delete'),
     
     # Organization
     path('branches/', manage_branches, name = 'manage_branch_page'),
